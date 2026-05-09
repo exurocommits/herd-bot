@@ -36,6 +36,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
 .top-grid{grid-template-columns:repeat(4,1fr)}
 .main-grid{grid-template-columns:1fr 1fr 340px}
 .bottom-grid{grid-template-columns:2fr 1fr}
+.funding-grid{grid-template-columns:1fr 1fr 1fr}
+.portfolio-grid{grid-template-columns:1fr 1fr}
 
 /* ── Panel ──────────────────────────────── */
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden}
@@ -98,6 +100,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
 .whale-alerts{margin-top:10px}
 .whale-item{font-size:10px;font-family:var(--mono);padding:3px 0;color:var(--blue);border-bottom:1px solid var(--bg4)}
 
+/* ── Funding / OI ───────────────────────── */
+.funding-card{background:var(--bg3);border-radius:4px;padding:10px 12px}
+.funding-card .fc-coin{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.funding-card .fc-rate{font-family:var(--mono);font-size:18px;font-weight:700}
+.funding-card .fc-signal{font-size:10px;margin-top:4px;font-family:var(--mono)}
+.funding-card .fc-bar{height:6px;background:var(--bg);border-radius:3px;margin-top:6px;overflow:hidden;position:relative}
+.funding-card .fc-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.oi-card{background:var(--bg3);border-radius:4px;padding:10px 12px}
+.oi-card .oc-coin{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.oi-card .oc-value{font-family:var(--mono);font-size:16px;font-weight:700;margin-top:4px}
+.oi-card .oc-signal{font-size:10px;margin-top:2px;font-family:var(--mono)}
+
 /* ── Charts ─────────────────────────────── */
 .chart-canvas{width:100%;height:200px;display:block}
 .chart-tabs{display:flex;gap:2px;margin-bottom:8px}
@@ -117,6 +131,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
 .bt-table tr:hover{background:var(--bg3)}
 .bt-table .rank{color:var(--yellow);font-weight:700}
 
+/* ── Portfolio ──────────────────────────── */
+.portfolio-weights{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pw-item{background:var(--bg3);border-radius:4px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
+.pw-item .pw-name{font-size:11px;color:var(--text-dim)}
+.pw-item .pw-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)}
+.walk-forward{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.wf-block{background:var(--bg3);border-radius:4px;padding:10px;text-align:center}
+.wf-block .wf-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.wf-block .wf-value{font-family:var(--mono);font-size:20px;font-weight:900;margin-top:4px}
+
+/* ── Heatmap ────────────────────────────── */
+.heatmap-grid{display:grid;gap:2px;font-size:10px;font-family:var(--mono)}
+.heatmap-cell{padding:4px 6px;text-align:center;border-radius:2px;font-weight:600}
+
 /* ── Footer ─────────────────────────────── */
 .footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text-dim)}
 .footer a{color:var(--green);text-decoration:none}
@@ -125,11 +153,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
 @media(max-width:1200px){
   .main-grid{grid-template-columns:1fr 1fr}
   .top-grid{grid-template-columns:repeat(2,1fr)}
+  .funding-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:768px){
   .top-grid{grid-template-columns:1fr 1fr}
   .main-grid{grid-template-columns:1fr}
   .bottom-grid{grid-template-columns:1fr}
+  .funding-grid{grid-template-columns:1fr}
+  .portfolio-grid{grid-template-columns:1fr}
   .strategy-grid{grid-template-columns:1fr}
   .header{flex-wrap:wrap;gap:10px}
 }
@@ -142,7 +173,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
   <div class="logo">
     <div>
       <div class="logo-text">HERD</div>
-      <div class="logo-sub">Trading Intelligence Terminal</div>
+      <div class="logo-sub">HyperLiquid Trading Terminal</div>
     </div>
   </div>
   <div class="header-stats">
@@ -151,7 +182,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
       <div class="btc-ticker mono" id="btcPrice">—</div>
     </div>
     <div class="header-stat">
-      <div class="label">Binance WS</div>
+      <div class="label">HyperLiquid WS</div>
       <div class="value mono"><span class="status-dot" id="wsStatus"></span><span id="wsText">Connecting...</span></div>
     </div>
     <div class="header-stat">
@@ -191,12 +222,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
       <canvas class="sparkline-canvas" id="spark-SOL"></canvas>
     </div>
   </div>
-  <div class="panel" id="card-XRP">
+  <div class="panel" id="card-HYPE">
     <div class="panel-body market-card">
-      <div class="asset-name">XRP / USDT</div>
-      <div class="price mono" id="price-XRP">—</div>
-      <div class="change mono" id="change-XRP">—</div>
-      <canvas class="sparkline-canvas" id="spark-XRP"></canvas>
+      <div class="asset-name">HYPE / USDT</div>
+      <div class="price mono" id="price-HYPE">—</div>
+      <div class="change mono" id="change-HYPE">—</div>
+      <canvas class="sparkline-canvas" id="spark-HYPE"></canvas>
     </div>
   </div>
 </div>
@@ -247,15 +278,52 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
   </div>
 </div>
 
+<!-- ═══ FUNDING + OI + ORDER BOOK ═══ -->
+<div class="grid funding-grid">
+  <!-- Funding Rates -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">💰 Funding Rates</span>
+      <span class="panel-badge" id="fundingBadge">Live</span>
+    </div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px" id="fundingCards"></div>
+    </div>
+  </div>
+
+  <!-- Open Interest -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">📊 Open Interest</span>
+      <span class="panel-badge" id="oiBadge">—</span>
+    </div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px" id="oiCards"></div>
+    </div>
+  </div>
+
+  <!-- Order Book Imbalance -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">📖 Book Imbalance</span>
+      <span class="panel-badge" id="bookBadge">—</span>
+    </div>
+    <div class="panel-body">
+      <div id="bookImbalance" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ BOTTOM: Performance + Backtest ═══ -->
 <div class="grid bottom-grid">
   <!-- Performance Charts -->
   <div class="panel">
     <div class="panel-head">
-      <span class="panel-title">📊 Performance</span>
+      <span class="panel-title">📈 Performance</span>
       <div class="chart-tabs">
         <button class="chart-tab active" onclick="showChart('equity')">Equity</button>
         <button class="chart-tab" onclick="showChart('comparison')">Comparison</button>
+        <button class="chart-tab" onclick="showChart('heatmap')">Heatmap</button>
       </div>
     </div>
     <div class="panel-body">
@@ -266,6 +334,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
         <div><div style="font-size:10px;color:var(--text-dim)">Win Rate</div><div class="mono" style="font-size:14px;font-weight:700" id="totalWinRate">0%</div></div>
         <div><div style="font-size:10px;color:var(--text-dim)">Active</div><div class="mono" style="font-size:14px;font-weight:700" id="totalActive">0</div></div>
       </div>
+      <!-- Heatmap container (hidden by default) -->
+      <div id="heatmapContainer" style="display:none;margin-top:10px"></div>
     </div>
   </div>
 
@@ -277,16 +347,47 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:h
     </div>
     <div class="panel-body">
       <button class="btn btn-primary" id="btnBacktest" onclick="runBacktest()">▶ Run Backtest</button>
+      <button class="btn btn-primary" id="btnPortfolio" onclick="runPortfolio()" style="margin-left:6px">🎯 Optimize Portfolio</button>
       <div class="progress-bar" id="btProgress" style="display:none"><div class="progress-bar-fill" id="btProgressFill" style="width:0%"></div></div>
       <div id="btResults"></div>
     </div>
   </div>
 </div>
 
+<!-- ═══ PORTFOLIO RESULTS ═══ -->
+<div class="grid portfolio-grid" id="portfolioSection" style="display:none">
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">🎯 Optimal Portfolio</span>
+      <span class="panel-badge" id="portSharpeBadge">—</span>
+    </div>
+    <div class="panel-body">
+      <canvas class="chart-canvas" id="portfolioChart"></canvas>
+      <div class="portfolio-weights" id="portfolioWeights"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">🔄 Walk-Forward Validation</span>
+      <span class="panel-badge" id="wfBadge">—</span>
+    </div>
+    <div class="panel-body">
+      <div class="walk-forward" id="walkForward">
+        <div class="wf-block"><div class="wf-label">Train Sharpe</div><div class="wf-value" id="wfTrain">—</div></div>
+        <div class="wf-block"><div class="wf-label">Test Sharpe</div><div class="wf-value" id="wfTest">—</div></div>
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Correlation Matrix</div>
+        <div id="corrMatrix"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ FOOTER ═══ -->
 <div class="footer">
-  <div>⚠ Paper trading only — not financial advice</div>
-  <div>HERD v1.0 · <span id="uptime">0s</span> uptime · <span id="footerStrats">0</span> strategies</div>
+  <div>⚠ Paper trading only — not financial advice · Powered by HyperLiquid</div>
+  <div>HERD v2.0 · <span id="uptime">0s</span> uptime · <span id="footerStrats">0</span> strategies</div>
 </div>
 
 <script>
@@ -298,10 +399,11 @@ let reconnectTimer = null;
 let signalCount = 0;
 let currentChart = 'equity';
 let latestData = null;
+let portfolioData = null;
 
-const ASSETS = ['BTC','ETH','SOL','XRP'];
+const ASSETS = ['BTC','ETH','SOL','HYPE'];
 const COLORS = {
-  BTC:'#ff9500', ETH:'#00b4d8', SOL:'#b388ff', XRP:'#00ff41',
+  BTC:'#ff9500', ETH:'#00b4d8', SOL:'#b388ff', HYPE:'#00ff41',
   green:'#00ff41', red:'#ff2d2d', yellow:'#ffd60a', purple:'#b388ff'
 };
 
@@ -323,13 +425,11 @@ function connectWS() {
     } catch(err) { console.error('WS parse error', err); }
   };
   ws.onclose = () => {
-    console.log('WS closed, reconnecting...');
     clearTimeout(reconnectTimer);
     reconnectTimer = setTimeout(connectWS, 3000);
   };
   ws.onerror = () => { ws.close(); };
 
-  // Send ping
   setInterval(() => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({type:'ping'})); }, 30000);
 }
 
@@ -337,11 +437,11 @@ function connectWS() {
 // RENDER
 // ═══════════════════════════════════════════════════════════════════════════════
 function render(d) {
-  // Header
   const btcPrice = d.prices['BTC/USDT'];
   document.getElementById('btcPrice').textContent = btcPrice > 0 ? formatPrice(btcPrice) : '—';
-  document.getElementById('wsStatus').className = 'status-dot ' + (d.binance_connected ? 'on' : 'off');
-  document.getElementById('wsText').textContent = d.binance_connected ? 'Connected' : 'Offline';
+  const connected = d.hl_connected || false;
+  document.getElementById('wsStatus').className = 'status-dot ' + (connected ? 'on' : 'off');
+  document.getElementById('wsText').textContent = connected ? 'Connected' : 'Offline';
   const activeCount = d.strategies ? d.strategies.filter(s => s.active).length : 0;
   document.getElementById('stratCount').textContent = activeCount + ' / ' + (d.strategies ? d.strategies.length : 0);
   document.getElementById('signalCount').textContent = d.signals ? d.signals.length : 0;
@@ -363,18 +463,14 @@ function render(d) {
     }
   });
 
-  // Strategy grid
   renderStrategies(d.strategies || []);
   document.getElementById('activeStratBadge').textContent = activeCount + ' active';
-
-  // Signal feed
   renderSignals(d.signals || []);
-
-  // Sentiment
   renderSentiment(d.sentiment);
-
-  // Performance
   renderPerformance(d.performance);
+  renderFunding(d.funding_rates);
+  renderOI(d.open_interest);
+  renderBookImbalance(d.sentiment);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -396,36 +492,25 @@ function drawSparkline(canvasId, data, asset) {
   canvas.height = rect.height * dpr;
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, rect.width, rect.height);
-
   const w = rect.width, h = rect.height;
   const pts = data.slice(-60);
   const min = Math.min(...pts), max = Math.max(...pts);
   const range = max - min || 1;
-  const color = COLORS[asset] || '#00ff41';
   const isUp = pts[pts.length-1] >= pts[0];
-
-  // Gradient fill
   const grad = ctx.createLinearGradient(0, 0, 0, h);
   grad.addColorStop(0, (isUp ? 'rgba(0,255,65,' : 'rgba(255,45,45,') + '0.2)');
   grad.addColorStop(1, 'rgba(0,0,0,0)');
-
   ctx.beginPath();
   pts.forEach((v, i) => {
     const x = (i / (pts.length - 1)) * w;
     const y = h - ((v - min) / range) * (h - 4) - 2;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   });
   ctx.strokeStyle = isUp ? '#00ff41' : '#ff2d2d';
   ctx.lineWidth = 1.5;
   ctx.stroke();
-
-  // Fill area
-  ctx.lineTo(w, h);
-  ctx.lineTo(0, h);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
+  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -454,9 +539,9 @@ function renderStrategies(strats) {
 // SIGNAL FEED
 // ═══════════════════════════════════════════════════════════════════════════════
 function renderSignals(signals) {
-  const el = document.getElementById('signalFeed');
   if (!signals || signals.length === 0) return;
-  const html = signals.slice().reverse().slice(0, 50).map(s => {
+  const el = document.getElementById('signalFeed');
+  el.innerHTML = signals.slice().reverse().slice(0, 50).map(s => {
     const t = s.timestamp ? new Date(s.timestamp * 1000) : new Date();
     const ts = t.toLocaleTimeString('en-US', {hour12:false});
     return `<div class="signal-item">
@@ -466,7 +551,6 @@ function renderSignals(signals) {
       <span class="sig-time">${ts}</span>
     </div>`;
   }).join('');
-  el.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -478,7 +562,6 @@ function renderSentiment(sent) {
   drawGauge(fg);
   document.getElementById('fgLabel').textContent = Math.round(fg);
   document.getElementById('fgBadge').textContent = Math.round(fg);
-
   let label = 'Neutral', color = '#888';
   if (fg < 20) { label = 'Extreme Fear'; color = '#ff2d2d'; }
   else if (fg < 40) { label = 'Fear'; color = '#ff9500'; }
@@ -488,23 +571,23 @@ function renderSentiment(sent) {
   document.getElementById('fgSub').textContent = label;
   document.getElementById('fgLabel').style.color = color;
 
-  // Per-asset sentiment
   const assets = sent.assets || {};
-  const el = document.getElementById('sentAssets');
-  el.innerHTML = Object.entries(assets).map(([k, v]) => {
+  document.getElementById('sentAssets').innerHTML = Object.entries(assets).map(([k, v]) => {
     const short = k.split('/')[0];
-    const pct = (v.score + 100) / 2; // 0-100
+    const pct = (v.score + 100) / 2;
     const clr = v.score > 0 ? '#00ff41' : v.score < 0 ? '#ff2d2d' : '#888';
     const arrow = v.momentum > 2 ? '↑' : v.momentum < -2 ? '↓' : '→';
     const arrowClr = v.momentum > 2 ? '#00ff41' : v.momentum < -2 ? '#ff2d2d' : '#888';
+    let hlBadge = '';
+    if (v.funding_signal) hlBadge += ` <span style="color:${v.funding_signal==='BUY'?'var(--green)':'var(--red)'}">F:${v.funding_signal}</span>`;
+    if (v.oi_signal) hlBadge += ` <span style="color:${v.oi_signal==='BUY'?'var(--green)':'var(--red)'}">OI:${v.oi_signal}</span>`;
     return `<div class="sent-asset">
-      <div class="sa-name">${short} <span style="color:${arrowClr};font-weight:900">${arrow}</span></div>
+      <div class="sa-name">${short} <span style="color:${arrowClr};font-weight:900">${arrow}</span>${hlBadge}</div>
       <div class="sa-score" style="color:${clr}">${v.score > 0 ? '+' : ''}${v.score.toFixed(0)}</div>
       <div class="sa-bar"><div class="sa-bar-fill" style="width:${pct}%;background:${clr}"></div></div>
     </div>`;
   }).join('');
 
-  // Whale alerts
   const wEl = document.getElementById('whaleAlerts');
   const whales = [];
   Object.values(assets).forEach(v => { if (v.whale_activity) whales.push(...v.whale_activity); });
@@ -524,61 +607,111 @@ function drawGauge(value) {
   canvas.height = rect.height * dpr;
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, rect.width, rect.height);
-
   const w = rect.width, h = rect.height;
-  const cx = w / 2, cy = h - 10;
-  const r = Math.min(w, h) * 0.7;
-
-  // Draw arc background
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, Math.PI, 0, false);
-  ctx.lineWidth = 12;
-  ctx.strokeStyle = '#1a1a1a';
-  ctx.stroke();
-
-  // Draw colored arc segments
+  const cx = w / 2, cy = h - 10, r = Math.min(w, h) * 0.7;
+  ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 0, false); ctx.lineWidth = 12; ctx.strokeStyle = '#1a1a1a'; ctx.stroke();
   const segments = [
-    {start: 0, end: 0.2, color: '#ff2d2d'},
-    {start: 0.2, end: 0.4, color: '#ff9500'},
-    {start: 0.4, end: 0.6, color: '#888'},
-    {start: 0.6, end: 0.8, color: '#00cc33'},
-    {start: 0.8, end: 1.0, color: '#00ff41'},
+    {start:0,end:0.2,color:'#ff2d2d'},{start:0.2,end:0.4,color:'#ff9500'},
+    {start:0.4,end:0.6,color:'#888'},{start:0.6,end:0.8,color:'#00cc33'},{start:0.8,end:1.0,color:'#00ff41'},
   ];
   segments.forEach(seg => {
-    ctx.beginPath();
-    const a1 = Math.PI + seg.start * Math.PI;
-    const a2 = Math.PI + seg.end * Math.PI;
-    ctx.arc(cx, cy, r, a1, a2, false);
-    ctx.lineWidth = 12;
-    ctx.strokeStyle = seg.color;
-    ctx.globalAlpha = 0.3;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI + seg.start*Math.PI, Math.PI + seg.end*Math.PI, false);
+    ctx.lineWidth = 12; ctx.strokeStyle = seg.color; ctx.globalAlpha = 0.3; ctx.stroke(); ctx.globalAlpha = 1;
   });
-
-  // Needle
   const angle = Math.PI + (value / 100) * Math.PI;
-  const nx = cx + Math.cos(angle) * (r - 20);
-  const ny = cy + Math.sin(angle) * (r - 20);
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(nx, ny);
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 2;
-  ctx.stroke();
+  const nx = cx + Math.cos(angle) * (r - 20), ny = cy + Math.sin(angle) * (r - 20);
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(nx, ny); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.font = '9px sans-serif'; ctx.fillStyle = '#666'; ctx.textAlign = 'center';
+  ctx.fillText('FEAR', cx - r + 10, cy - r + 25); ctx.fillText('GREED', cx + r - 10, cy - r + 25);
+}
 
-  // Center dot
-  ctx.beginPath();
-  ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-  ctx.fillStyle = '#fff';
-  ctx.fill();
+// ═══════════════════════════════════════════════════════════════════════════════
+// FUNDING RATES
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderFunding(funding) {
+  if (!funding) return;
+  const coins = ['BTC','ETH','SOL','HYPE'];
+  document.getElementById('fundingCards').innerHTML = coins.map(coin => {
+    const fd = funding[coin] || {};
+    const rate = fd.rate || 0;
+    const pct = (rate * 100).toFixed(4);
+    const annualized = (rate * 3 * 365 * 100).toFixed(1);
+    const color = rate >= 0 ? 'var(--green)' : 'var(--red)';
+    const barW = Math.min(100, Math.abs(rate) * 10000); // scale for visibility
+    let signal = '';
+    if (latestData && latestData.sentiment) {
+      const assetKey = coin + '/USDT';
+      const sd = latestData.sentiment.assets && latestData.sentiment.assets[assetKey];
+      if (sd && sd.funding_signal) {
+        signal = `<div class="fc-signal" style="color:${sd.funding_signal==='BUY'?'var(--green)':'var(--red)'}">Signal: ${sd.funding_signal} (${(sd.funding_confidence*100).toFixed(0)}%)</div>`;
+      }
+    }
+    return `<div class="funding-card">
+      <div class="fc-coin">${coin}</div>
+      <div class="fc-rate" style="color:${color}">${rate >= 0 ? '+' : ''}${pct}%</div>
+      <div style="font-size:9px;color:var(--text-dim);font-family:var(--mono)">~${annualized}% annual</div>
+      <div class="fc-bar"><div class="fc-bar-fill" style="width:${barW}%;background:${color}"></div></div>
+      ${signal}
+    </div>`;
+  }).join('');
+}
 
-  // Labels
-  ctx.font = '9px sans-serif';
-  ctx.fillStyle = '#666';
-  ctx.textAlign = 'center';
-  ctx.fillText('FEAR', cx - r + 10, cy - r + 25);
-  ctx.fillText('GREED', cx + r - 10, cy - r + 25);
+// ═══════════════════════════════════════════════════════════════════════════════
+// OPEN INTEREST
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderOI(oi) {
+  if (!oi) return;
+  const coins = ['BTC','ETH','SOL','HYPE'];
+  let hasData = false;
+  const html = coins.map(coin => {
+    const data = oi[coin] || {};
+    const value = data.openInterest || data.sz || 0;
+    if (value) hasData = true;
+    let signal = '';
+    if (latestData && latestData.sentiment) {
+      const assetKey = coin + '/USDT';
+      const sd = latestData.sentiment.assets && latestData.sentiment.assets[assetKey];
+      if (sd && sd.oi_signal) {
+        signal = `<div class="oc-signal" style="color:${sd.oi_signal==='BUY'?'var(--green)':'var(--red)'}">Signal: ${sd.oi_signal} (${(sd.oi_confidence*100).toFixed(0)}%)</div>`;
+      }
+    }
+    return `<div class="oi-card">
+      <div class="oc-coin">${coin}</div>
+      <div class="oc-value">${value ? formatOI(value) : '—'}</div>
+      ${signal}
+    </div>`;
+  }).join('');
+  document.getElementById('oiCards').innerHTML = html;
+  document.getElementById('oiBadge').textContent = hasData ? 'Live' : '—';
+}
+
+function formatOI(v) {
+  if (v >= 1e9) return '$' + (v/1e9).toFixed(2) + 'B';
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return '$' + (v/1e3).toFixed(1) + 'K';
+  return v.toFixed(2);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BOOK IMBALANCE
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderBookImbalance(sent) {
+  if (!sent || !sent.assets) return;
+  const el = document.getElementById('bookImbalance');
+  el.innerHTML = Object.entries(sent.assets).map(([k, v]) => {
+    const coin = k.split('/')[0];
+    const imb = v.book_imbalance || 0;
+    const clr = imb > 0.1 ? 'var(--green)' : imb < -0.1 ? 'var(--red)' : 'var(--text-dim)';
+    const label = imb > 0.1 ? 'Bid-heavy' : imb < -0.1 ? 'Ask-heavy' : 'Balanced';
+    const pct = ((imb + 1) / 2) * 100;
+    return `<div class="funding-card">
+      <div class="fc-coin">${coin}</div>
+      <div class="fc-rate" style="color:${clr}">${(imb*100).toFixed(1)}%</div>
+      <div style="font-size:9px;color:${clr}">${label}</div>
+      <div class="fc-bar"><div class="fc-bar-fill" style="width:${pct}%;background:${clr}"></div></div>
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -588,6 +721,11 @@ function showChart(type) {
   currentChart = type;
   document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
+  if (type === 'heatmap') {
+    document.getElementById('heatmapContainer').style.display = 'block';
+  } else {
+    document.getElementById('heatmapContainer').style.display = 'none';
+  }
   if (latestData) renderPerformance(latestData.performance);
 }
 
@@ -600,14 +738,17 @@ function renderPerformance(perf) {
   document.getElementById('totalWinRate').textContent = perf.overall_win_rate.toFixed(1) + '%';
   document.getElementById('totalActive').textContent = perf.active_strategies;
 
+  if (currentChart === 'heatmap') {
+    renderHeatmap(latestData ? latestData.strategies : []);
+    return;
+  }
+
   const canvas = document.getElementById('perfChart');
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, rect.width, rect.height);
+  canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr); ctx.clearRect(0, 0, rect.width, rect.height);
 
   if (currentChart === 'equity') {
     drawEquityCurve(ctx, rect.width, rect.height, perf.combined_equity_curve || []);
@@ -618,90 +759,85 @@ function renderPerformance(perf) {
 
 function drawEquityCurve(ctx, w, h, data) {
   if (data.length < 2) {
-    ctx.font = '12px sans-serif';
-    ctx.fillStyle = '#666';
-    ctx.textAlign = 'center';
-    ctx.fillText('Collecting data...', w/2, h/2);
-    return;
+    ctx.font = '12px sans-serif'; ctx.fillStyle = '#666'; ctx.textAlign = 'center';
+    ctx.fillText('Collecting data...', w/2, h/2); return;
   }
-
-  const pad = {t:10, b:30, l:50, r:10};
-  const cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = max - min || 1;
-
-  // Grid
-  ctx.strokeStyle = '#1a1a1a';
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.t + (i / 4) * ch;
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
-    ctx.fillStyle = '#444';
-    ctx.font = '9px monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText((max - (i/4)*range).toFixed(0), pad.l - 5, y + 3);
+  const pad = {t:10,b:30,l:50,r:10};
+  const cw = w-pad.l-pad.r, ch = h-pad.t-pad.b;
+  const min = Math.min(...data), max = Math.max(...data), range = max-min||1;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 0.5;
+  for (let i=0;i<=4;i++) {
+    const y = pad.t + (i/4)*ch;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillStyle = '#444'; ctx.font = '9px monospace'; ctx.textAlign = 'right';
+    ctx.fillText((max-(i/4)*range).toFixed(0), pad.l-5, y+3);
   }
-
-  // Line
   const isUp = data[data.length-1] >= data[0];
-  const lineColor = isUp ? '#00ff41' : '#ff2d2d';
   ctx.beginPath();
-  data.forEach((v, i) => {
-    const x = pad.l + (i / (data.length - 1)) * cw;
-    const y = pad.t + (1 - (v - min) / range) * ch;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+  data.forEach((v,i) => {
+    const x = pad.l+(i/(data.length-1))*cw, y = pad.t+(1-(v-min)/range)*ch;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
   });
-  ctx.strokeStyle = lineColor;
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Gradient fill
-  const grad = ctx.createLinearGradient(0, pad.t, 0, h - pad.b);
-  grad.addColorStop(0, (isUp ? 'rgba(0,255,65,' : 'rgba(255,45,45,') + '0.15)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.lineTo(pad.l + cw, h - pad.b);
-  ctx.lineTo(pad.l, h - pad.b);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Label
-  ctx.fillStyle = '#666';
-  ctx.font = '9px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Combined Equity Curve', w/2, h - 5);
+  ctx.strokeStyle = isUp ? '#00ff41' : '#ff2d2d'; ctx.lineWidth = 2; ctx.stroke();
+  const grad = ctx.createLinearGradient(0,pad.t,0,h-pad.b);
+  grad.addColorStop(0,(isUp?'rgba(0,255,65,':'rgba(255,45,45,')+'0.15)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.lineTo(pad.l+cw,h-pad.b); ctx.lineTo(pad.l,h-pad.b); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.fillStyle = '#666'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('Combined Equity Curve', w/2, h-5);
 }
 
 function drawComparison(ctx, w, h, strategies) {
   if (!strategies || strategies.length === 0) return;
   const sorted = [...strategies].sort((a,b) => b.pnl - a.pnl).slice(0, 12);
-  const pad = {t:10, b:20, l:120, r:10};
-  const cw = w - pad.l - pad.r;
-  const barH = Math.min(20, (h - pad.t - pad.b) / sorted.length - 4);
+  const pad = {t:10,b:20,l:120,r:10};
+  const cw = w-pad.l-pad.r;
+  const barH = Math.min(20, (h-pad.t-pad.b)/sorted.length - 4);
   const maxPnl = Math.max(...sorted.map(s => Math.abs(s.pnl)), 1);
-
-  sorted.forEach((s, i) => {
-    const y = pad.t + i * (barH + 4);
-    const barW = (Math.abs(s.pnl) / maxPnl) * cw;
-    const color = s.pnl >= 0 ? '#00ff41' : '#ff2d2d';
-    ctx.fillStyle = color;
+  sorted.forEach((s,i) => {
+    const y = pad.t+i*(barH+4);
+    const barW = (Math.abs(s.pnl)/maxPnl)*cw;
+    ctx.fillStyle = s.pnl>=0 ? '#00ff41' : '#ff2d2d';
     ctx.globalAlpha = 0.7;
-    const x = s.pnl >= 0 ? pad.l : pad.l - barW;
-    ctx.fillRect(x, y, barW, barH);
+    ctx.fillRect(s.pnl>=0 ? pad.l : pad.l-barW, y, barW, barH);
     ctx.globalAlpha = 1;
-
-    // Name
-    ctx.fillStyle = '#ccc';
-    ctx.font = '10px monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText(s.name.slice(0, 16), pad.l - 5, y + barH / 2 + 3);
-
-    // Value
-    ctx.fillStyle = color;
-    ctx.textAlign = 'left';
-    ctx.fillText((s.pnl >= 0 ? '+' : '') + s.pnl.toFixed(1) + '%', pad.l + barW + 5, y + barH / 2 + 3);
+    ctx.fillStyle = '#ccc'; ctx.font = '10px monospace'; ctx.textAlign = 'right';
+    ctx.fillText(s.name.slice(0,16), pad.l-5, y+barH/2+3);
+    ctx.fillStyle = s.pnl>=0 ? '#00ff41' : '#ff2d2d'; ctx.textAlign = 'left';
+    ctx.fillText((s.pnl>=0?'+':'')+s.pnl.toFixed(1)+'%', pad.l+barW+5, y+barH/2+3);
   });
+}
+
+function renderHeatmap(strategies) {
+  if (!strategies || strategies.length === 0) return;
+  const metrics = ['sharpe','return_pct','win_rate','max_drawdown'];
+  const labels = ['Sharpe','Return','Win Rate','Max DD'];
+  const top = strategies.slice(0, 10);
+  const el = document.getElementById('heatmapContainer');
+  let html = '<div class="heatmap-grid" style="grid-template-columns:120px repeat('+metrics.length+',1fr)">';
+  html += '<div></div>';
+  labels.forEach(l => html += `<div style="font-size:9px;color:var(--text-dim);text-align:center;padding:4px">${l}</div>`);
+  top.forEach(s => {
+    html += `<div style="font-size:10px;color:var(--text-dim);padding:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.name)}</div>`;
+    metrics.forEach(m => {
+      const v = s[m] || 0;
+      let bg, clr;
+      if (m === 'max_drawdown') {
+        bg = v > 20 ? 'rgba(255,45,45,0.4)' : v > 10 ? 'rgba(255,149,0,0.3)' : 'rgba(0,255,65,0.2)';
+        clr = v > 20 ? '#ff2d2d' : v > 10 ? '#ff9500' : '#00ff41';
+      } else if (m === 'win_rate') {
+        bg = v > 60 ? 'rgba(0,255,65,0.3)' : v > 40 ? 'rgba(255,213,10,0.2)' : 'rgba(255,45,45,0.2)';
+        clr = v > 60 ? '#00ff41' : v > 40 ? '#ffd60a' : '#ff2d2d';
+      } else {
+        bg = v > 1 ? 'rgba(0,255,65,0.3)' : v > 0 ? 'rgba(255,213,10,0.2)' : 'rgba(255,45,45,0.2)';
+        clr = v > 1 ? '#00ff41' : v > 0 ? '#ffd60a' : '#ff2d2d';
+      }
+      html += `<div class="heatmap-cell" style="background:${bg};color:${clr}">${v.toFixed(1)}</div>`;
+    });
+  });
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -709,12 +845,10 @@ function drawComparison(ctx, w, h, strategies) {
 // ═══════════════════════════════════════════════════════════════════════════════
 async function runBacktest() {
   const btn = document.getElementById('btnBacktest');
-  btn.disabled = true;
-  btn.textContent = '⏳ Running...';
+  btn.disabled = true; btn.textContent = '⏳ Running...';
   document.getElementById('btProgress').style.display = 'block';
   document.getElementById('btProgressFill').style.width = '30%';
   document.getElementById('btBadge').textContent = 'Running';
-
   try {
     const r = await fetch('/api/backtest/run', {method:'POST'});
     const data = await r.json();
@@ -724,10 +858,9 @@ async function runBacktest() {
     renderBacktestResults(data);
   } catch(err) {
     document.getElementById('btBadge').textContent = 'Error';
-    document.getElementById('btResults').innerHTML = '<div style="color:var(--red);font-size:12px;padding:10px">Error: ' + err.message + '</div>';
+    document.getElementById('btResults').innerHTML = '<div style="color:var(--red);font-size:12px;padding:10px">Error: '+err.message+'</div>';
   }
-  btn.disabled = false;
-  btn.textContent = '▶ Run Backtest';
+  btn.disabled = false; btn.textContent = '▶ Run Backtest';
 }
 
 async function loadBacktestResults() {
@@ -744,25 +877,100 @@ async function loadBacktestResults() {
 function renderBacktestResults(data) {
   if (!data || !data.results || data.results.length === 0) return;
   const results = data.results.slice(0, 15);
-  const el = document.getElementById('btResults');
-  el.innerHTML = `
+  document.getElementById('btResults').innerHTML = `
     <table class="bt-table">
-      <thead><tr>
-        <th>#</th><th>Strategy</th><th>Return</th><th>Sharpe</th><th>DD</th><th>Win%</th><th>Trades</th>
-      </tr></thead>
-      <tbody>
-        ${results.map((r, i) => `<tr>
-          <td class="rank">${i+1}</td>
-          <td>${esc(r.strategy)}</td>
-          <td style="color:${r.total_return>=0?'var(--green)':'var(--red)'}">${r.total_return>=0?'+':''}${r.total_return}%</td>
-          <td>${r.sharpe}</td>
-          <td style="color:var(--red)">${r.max_drawdown}%</td>
-          <td>${r.win_rate}%</td>
-          <td>${r.trades}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-  `;
+      <thead><tr><th>#</th><th>Strategy</th><th>Return</th><th>Sharpe</th><th>DD</th><th>Win%</th><th>Trades</th></tr></thead>
+      <tbody>${results.map((r,i) => `<tr>
+        <td class="rank">${i+1}</td><td>${esc(r.strategy)}</td>
+        <td style="color:${r.total_return>=0?'var(--green)':'var(--red)'}">${r.total_return>=0?'+':''}${r.total_return}%</td>
+        <td>${r.sharpe}</td><td style="color:var(--red)">${r.max_drawdown}%</td>
+        <td>${r.win_rate}%</td><td>${r.trades}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PORTFOLIO
+// ═══════════════════════════════════════════════════════════════════════════════
+async function runPortfolio() {
+  const btn = document.getElementById('btnPortfolio');
+  btn.disabled = true; btn.textContent = '⏳ Optimizing...';
+  document.getElementById('btProgress').style.display = 'block';
+  document.getElementById('btProgressFill').style.width = '20%';
+  try {
+    const r = await fetch('/api/portfolio/run', {method:'POST'});
+    portfolioData = await r.json();
+    document.getElementById('btProgressFill').style.width = '100%';
+    setTimeout(() => { document.getElementById('btProgress').style.display = 'none'; }, 1000);
+    renderPortfolioResults(portfolioData);
+  } catch(err) {
+    document.getElementById('btResults').innerHTML += '<div style="color:var(--red);font-size:12px;padding:10px">Portfolio error: '+err.message+'</div>';
+  }
+  btn.disabled = false; btn.textContent = '🎯 Optimize Portfolio';
+}
+
+async function loadPortfolioResults() {
+  try {
+    const r = await fetch('/api/portfolio/results');
+    const data = await r.json();
+    if (data && data.optimal_portfolio) {
+      portfolioData = data;
+      renderPortfolioResults(data);
+    }
+  } catch(e) {}
+}
+
+function renderPortfolioResults(data) {
+  if (!data || !data.optimal_portfolio) return;
+  document.getElementById('portfolioSection').style.display = 'grid';
+  const port = data.optimal_portfolio;
+  document.getElementById('portSharpeBadge').textContent = 'Sharpe: ' + port.sharpe;
+
+  // Weights
+  const weights = port.weights || {};
+  document.getElementById('portfolioWeights').innerHTML = Object.entries(weights).map(([name, w]) =>
+    `<div class="pw-item"><span class="pw-name">${esc(name)}</span><span class="pw-val">${(w*100).toFixed(0)}%</span></div>`
+  ).join('');
+
+  // Equity curve
+  const canvas = document.getElementById('portfolioChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr); ctx.clearRect(0, 0, rect.width, rect.height);
+  if (port.equity_curve && port.equity_curve.length > 2) {
+    drawEquityCurve(ctx, rect.width, rect.height, port.equity_curve);
+  }
+
+  // Walk-forward
+  if (data.walk_forward) {
+    const wf = data.walk_forward;
+    document.getElementById('wfTrain').textContent = wf.train ? wf.train.sharpe : '—';
+    document.getElementById('wfTrain').style.color = (wf.train && wf.train.sharpe > 0) ? 'var(--green)' : 'var(--red)';
+    document.getElementById('wfTest').textContent = wf.test ? wf.test.sharpe : '—';
+    document.getElementById('wfTest').style.color = (wf.test && wf.test.sharpe > 0) ? 'var(--green)' : 'var(--red)';
+    document.getElementById('wfBadge').textContent = 'Done';
+  }
+
+  // Correlation matrix
+  if (data.correlation_matrix && data.correlation_matrix.names) {
+    const names = data.correlation_matrix.names;
+    const matrix = data.correlation_matrix.matrix;
+    let html = '<div class="heatmap-grid" style="grid-template-columns:80px repeat('+names.length+',1fr)">';
+    html += '<div></div>';
+    names.forEach(n => html += `<div style="font-size:8px;color:var(--text-dim);text-align:center;padding:2px">${n.slice(0,8)}</div>`);
+    names.forEach((n1, i) => {
+      html += `<div style="font-size:8px;color:var(--text-dim);padding:2px">${n1.slice(0,8)}</div>`;
+      names.forEach((n2, j) => {
+        const v = matrix[i][j];
+        const bg = v > 0.7 ? 'rgba(0,255,65,0.3)' : v > 0.3 ? 'rgba(255,213,10,0.2)' : v < -0.3 ? 'rgba(255,45,45,0.3)' : 'rgba(136,136,136,0.1)';
+        html += `<div class="heatmap-cell" style="background:${bg};font-size:9px">${v.toFixed(2)}</div>`;
+      });
+    });
+    html += '</div>';
+    document.getElementById('corrMatrix').innerHTML = html;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -780,6 +988,7 @@ function formatUptime(s) {
 // ═══════════════════════════════════════════════════════════════════════════════
 connectWS();
 loadBacktestResults();
+loadPortfolioResults();
 </script>
 </body>
 </html>
