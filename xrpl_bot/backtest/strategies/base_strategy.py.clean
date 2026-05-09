@@ -1,0 +1,251 @@
+from dataclasses import dataclass, field
+from typing import Dict, Any, List, Optional
+import numpy as np
+
+@dataclass
+class Signal:
+    type: str  # 'BUY', 'SELL', or 'HOLD'
+    price: float
+    timestamp: float
+    confidence: float
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+class BaseStrategy:
+    def __init__(self):
+        self.data = None
+        self.signals = []
+
+    def init(self, data):
+        self.data = data
+        self.signals = []
+
+    def next(self, bar_idx: int) -> Signal:
+        raise NotImplementedError
+
+    def get_signals(self) -> list[Signal]:
+        return self.signals
+
+    def get_params(self) -> dict:
+        return {}
+
+class RiskManagedStrategy(BaseStrategy):
+    """
+    A decorator-like strategy wrapper that applies risk management 
+    (Stop Loss, Take Profit) to an underlying strategy.
+    """
+    def __init__(self, underlying_strategy: BaseStrategy, stop_loss_pct: float = 0.02, take_profit_pct: float = 0.05):
+        super().__init__()
+        self.strategy = underlying_strategy
+        self.stop_loss_pct = stop_loss_pct
+        self.take_profit_pct = take_profit_pct
+        self.active_position: Optional[Dict[str, Any]] = None 
+
+    def init(self, data):
+        super().init(data)
+        self.strategy.init(data)
+
+    def next(self, bar_idx: int) -> Signal:
+        # Get signal from the actual strategy
+        base_signal = self.strategy.next(bar_idx)
+        close_price = self.data['close'][bar_idx]
+        timestamp = self.data['timestamp'][bar_idx]
+
+        # 1. Check existing position for exit triggers (SL/TP)
+        if self.active_position:
+            entry_price = self.active_position['price']
+            direction = self.active_position['direction'] # 1 for Long, -1 for Short
+            pnl_pct = (close_price - entry_price) / entry_price * direction
+
+            if pnl_pct <= -self.stop_loss_pct:
+                self.active_position = None
+                return Signal('SELL' if direction == 1 else 'BUY', close_price, timestamp, 1.0, {'reason': 'stop_loss'})
+
+            if pnl_pct >= self.take_profit_pct:
+                self.active_position = None
+                return Signal('SELL' if direction == 1 else 'BUY', close_price, timestamp, 1.0, {'reason': 'take_profit'})
+
+            # If we are managing a position, we ignore new signals unless they are explicitly 'HOLD' 
+            # or we want to allow signal flipping (here we prioritize position management)
+            if base_signal.type == 'HOLD':
+                 return Signal('HOLD', close_price, timestamp, 0.0, {'reason': 'managing_position'})
+
+        # 2. Check for new entry signals
+        if base_signal.type in ['BUY', 'SELL'] and not self.active_position:
+            direction = 1 if base_signal.type == 'BUY' else -1
+            self.active_position = {
+                'price': close_price,
+                'direction': direction,
+                'timestamp': timestamp
+            }
+            return base_signal
+
+        return base_signal
+
+class EnsembleStrategy(BaseStrategy):
+    def __init__(self, strategies: List[BaseStrategy], voting_threshold: float = 0.5):
+        super().__init__()
+        self.strategies = strategies
+        self.voting_threshold = voting_threshold
+
+    def init(self, data):
+        for strategy in self.strategies:
+            strategy.init(data)
+
+    def next(self, bar_idx: int) -> Signal:
+        votes = {'BUY': 0, 'SELL': 0, 'HOLD': 0}
+        total_strategies = len(self.strategies)
+        for strategy in self.strategies:
+            signal = strategy.next(bar_idx)
+            votes[signal.type] += 1
+
+        best_signal_type = 'HOLD'
+        max_votes = 0
+        for s_type in ['BUY', 'SELL']:
+            if votes[s_type] / total_strategies >= self.voting_threshold:
+                if votes[s_type] > max_votes:
+                    max_votes = votes[s_type]
+                    best_signal_type = s_type
+
+        close_price = self.data['close'][bar_idx]
+        timestamp = self.data['timestamp'][bar_idx]
+        confidence = max_votes / total_strategies if max_votes > 0 else 0.0
+
+        return Signal(
+            type=best_signal_type,
+            price=close_price,
+            timestamp=timestamp,
+            confidence=confidence,
+            metadata={'ensemble_votes': votes}
+        )
+
+    def get_params(self) -> dict:
+        params = {'voting_threshold': self.voting_threshold}
+        for i, strategy in enumerate(self.strategies):
+            params[f'strategy_{i}_params'] = strategy.get_params()
+        return params
+
+class AdaptivePositionSizer(BaseStrategy):
+    def __init__(self, base_risk_pct: float = 0.01, atr_period: int = 14):
+        super().__init__()
+        self.base_risk_pct = base_risk_pct
+        self.atr_period = atr_period
+
+    def get_position_size(self, current_price: float, atr: float, account_equity: float) -> float:
+        if atr <= 0:
+            return 0.0
+        risk_amount = account_equity * self.base_risk_pct
+        size = risk_amount / atr
+        return size / current_price
+
+class TrailingStopStrategy(BaseStrategy):
+    def __init__(self, atr_multiplier: float = 2.0, atr_period: int = 14):
+        super().__init__()
+        self.atr_multiplier = atr_multiplier
+        self.atr_period = atr_period
+        self.highest_price = 0.0
+        self.stop_price = 0.0
+        self.active = False
+
+    def next(self, bar_idx: int) -> Signal:
+        if not self.active:
+            if bar_idx <= 0:
+                return Signal('HOLD', self.data['close'][bar_idx], self.data['timestamp'][bar_idx], 0.0)
+            
+            # Calculate ATR
+            high = self.data['high']
+            low = self.data['low']
+            close = self.data['close']
+            
+            tr = np.zeros(len(close))
+            for i in range(1, len(close)):
+                tr[i] = max(high[i] - low[i], abs(high[i] - close[i-1]), abs(low[i] - close[i-1]))
+            
+            atr = np.mean(tr[max(0, bar_idx-self.atr_period):bar_idx]) if bar_idx > 0 else tr[bar_idx]
+            if np.isnan(atr) or atr == 0: atr = close[bar_idx] * 0.01 # fallback
+
+            # Simple breakout logic to activate
+            if close[bar_idx] > high[bar_idx-1]: # Dummy trigger
+                self.active = True
+                self.highest_price = close[bar_idx]
+                self.stop_price = close[bar_idx] - (self.atr_multiplier * atr)
+                return Signal('BUY', close[bar_idx], self.data['timestamp'][bar_idx], 0.8)
+            
+            return Signal('HOLD', close[bar_idx], self.data['timestamp'][bar_idx], 0.0)
+
+        # If active, track highest price and update stop
+        current_price = self.data['close'][bar_idx]
+        if current_price > self.highest_price:
+            self.highest_price = current_price
+            # Recalculate ATR for dynamic trailing
+            high = self.data['high']
+            low = self.data['low']
+            close = self.data['close']
+            tr = np.zeros(len(close))
+            for i in range(1, len(close)):
+                tr[i] = max(high[i] - low[i], abs(high[i] - close[i-1]), abs(low[i] - close[i-1]))
+            atr = np.mean(tr[max(0, bar_idx-self.atr_period):bar_idx])
+            if not np.isnan(atr) and atr > 0:
+                self.stop_price = current_price - (self.atr_multiplier * atr)
+
+        if current_price < self.stop_price:
+            self.active = False
+            return Signal('SELL', current_price, self.data['timestamp'][bar_idx], 1.0, {'reason': 'trailing_stop'})
+        
+        return Signal('HOLD', current_price, self.data['timestamp'][bar_idx], 0.0)
+
+class MetaEnsembleStrategy(BaseStrategy):
+    """
+    A meta-ensemble strategy that uses a secondary model (or logic) 
+    to weight the signals of multiple sub-strategies.
+    """
+    def __init__(self, strategies: List[BaseStrategy], weights: Optional[List[float]] = None):
+        super().__init__()
+        self.strategies = strategies
+        if weights is not None:
+            if len(weights) != len(strategies):
+                raise ValueError("Weights must match number of strategies")
+            self.weights = np.array(weights)
+        else:
+            self.weights = np.ones(len(strategies)) / len(strategies)
+
+    def init(self, data):
+        for strategy in self.strategies:
+            strategy.init(data)
+
+    def next(self, bar_idx: int) -> Signal:
+        total_score = 0.0
+        close_price = self.data['close'][bar_idx]
+        timestamp = self.data['timestamp'][bar_idx]
+
+        for i, strategy in enumerate(self.strategies):
+            signal = strategy.next(bar_idx)
+            score = 0.0
+            if signal.type == 'BUY':
+                score = signal.confidence
+            elif signal.type == 'SELL':
+                score = -signal.confidence
+            
+            total_score += score * self.weights[i]
+
+        # Decision logic based on weighted score
+        threshold = 0.1
+        if total_score > threshold:
+            best_type = 'BUY'
+        elif total_score < -threshold:
+            best_type = 'SELL'
+        else:
+            best_type = 'HOLD'
+
+        return Signal(
+            type=best_type,
+            price=close_price,
+            timestamp=timestamp,
+            confidence=abs(total_score),
+            metadata={'meta_score': total_score}
+        )
+
+    def get_params(self) -> dict:
+        params = {'weights': self.weights.tolist()}
+        for i, strategy in enumerate(self.strategies):
+            params[f'strategy_{i}_params'] = strategy.get_params()
+        return params
